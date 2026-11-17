@@ -1,0 +1,35 @@
+@if (authService.user(); as user) {
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a routerLink="/" class="brand">
+        <span class="brand-dot"></span>
+        <span>Finanças POO</span>
+      </a>
+
+      <nav class="nav-links">
+        <a
+          routerLink="/"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          Início
+        </a>
+        <a routerLink="/transacoes" routerLinkActive="active">Transações</a>
+        <a routerLink="/transferencia" routerLinkActive="active">Transferência</a>
+        <a routerLink="/contas" routerLinkActive="active">Contas</a>
+        <a routerLink="/categorias" routerLinkActive="active">Categorias</a>
+      </nav>
+
+      <div class="user-area">
+        <span class="user-name">{{ user.nome }}</span>
+        <button type="button" class="btn btn-small btn-secondary" (click)="authService.logout()">
+          Sair
+        </button>
+      </div>
+    </div>
+  </header>
+}
+
+<main class="container">
+  <router-outlet />
+</main>

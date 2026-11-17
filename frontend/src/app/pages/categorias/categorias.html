@@ -1,0 +1,98 @@
+<div class="page-header">
+  <div>
+    <h1>Categorias</h1>
+    <p class="subtitle">Organize suas receitas e despesas por categoria</p>
+  </div>
+</div>
+
+@if (error()) {
+  <div class="alert alert-error">{{ error() }}</div>
+}
+@if (feedback()) {
+  <div class="alert alert-success">{{ feedback() }}</div>
+}
+
+<div class="two-col-layout">
+  <div class="card">
+    <h2>{{ editandoId() ? 'Editar Categoria' : 'Nova Categoria' }}</h2>
+    <form (ngSubmit)="salvar()" class="form-stack">
+      <label class="field">
+        <span>Descrição</span>
+        <input
+          type="text"
+          name="descricao"
+          [(ngModel)]="descricao"
+          required
+          placeholder="Ex.: Alimentação, Salário, Aluguel"
+        />
+      </label>
+
+      <label class="field">
+        <span>Tipo</span>
+        <select name="tipo" [(ngModel)]="tipo">
+          <option value="A">Ambos (Receita e Despesa)</option>
+          <option value="R">Receita</option>
+          <option value="D">Despesa</option>
+        </select>
+      </label>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Salvando...' : editandoId() ? 'Atualizar' : 'Cadastrar' }}
+        </button>
+        @if (editandoId()) {
+          <button type="button" class="btn btn-secondary" (click)="limparFormulario()">
+            Cancelar
+          </button>
+        }
+      </div>
+    </form>
+  </div>
+
+  <div class="card table-card">
+    <h2>Categorias Cadastradas</h2>
+    @if (loading()) {
+      <p>Carregando...</p>
+    } @else if (categorias().length === 0) {
+      <p class="empty-inline">Nenhuma categoria cadastrada ainda.</p>
+    } @else {
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Descrição</th>
+            <th>Tipo</th>
+            <th class="text-right">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (cat of categorias(); track cat.id) {
+            <tr>
+              <td>
+                <a routerLink="/transacoes" [queryParams]="{ categoriaId: cat.id }" class="link-inline">
+                  {{ cat.descricao }}
+                </a>
+              </td>
+              <td>
+                <span
+                  class="badge"
+                  [class.badge-income]="cat.tipo === 'R'"
+                  [class.badge-expense]="cat.tipo === 'D'"
+                >
+                  {{ rotuloTipo(cat.tipo) }}
+                </span>
+              </td>
+              <td class="text-right actions-cell">
+                <button type="button" class="btn btn-small btn-secondary" (click)="editar(cat)">
+                  Editar
+                </button>
+                <button type="button" class="btn btn-small btn-danger" (click)="excluir(cat)">
+                  Excluir
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>

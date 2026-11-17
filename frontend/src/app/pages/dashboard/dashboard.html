@@ -1,0 +1,122 @@
+<div class="page-header">
+  <div>
+    <h1>Visão Geral</h1>
+    <p class="subtitle">Saldo geral, saldo por conta e últimas movimentações</p>
+  </div>
+  <div class="header-actions">
+    <a routerLink="/transacoes" class="btn btn-primary">+ Nova Transação</a>
+    <a routerLink="/transferencia" class="btn btn-secondary">⇄ Transferir</a>
+  </div>
+</div>
+
+@if (error()) {
+  <div class="alert alert-error">{{ error() }}</div>
+}
+
+@if (loading()) {
+  <div class="card">Carregando resumo financeiro...</div>
+} @else if (resumo(); as data) {
+  <section class="summary-grid">
+    <div class="card summary-card summary-total">
+      <span class="summary-label">Saldo Geral</span>
+      <strong class="summary-value" [class.negative]="data.saldoGeral < 0">
+        {{ formatBRL(data.saldoGeral) }}
+      </strong>
+      <small>Soma de {{ data.contas.length }} conta(s)</small>
+    </div>
+
+    <div class="card summary-card">
+      <span class="summary-label">Total de Receitas</span>
+      <strong class="summary-value positive">{{ formatBRL(data.totalReceitas) }}</strong>
+      <small>Entradas acumuladas</small>
+    </div>
+
+    <div class="card summary-card">
+      <span class="summary-label">Total de Despesas</span>
+      <strong class="summary-value negative">{{ formatBRL(data.totalDespesas) }}</strong>
+      <small>Saídas acumuladas</small>
+    </div>
+  </section>
+
+  <section class="section-block">
+    <div class="section-title-row">
+      <h2>Saldo por Conta</h2>
+      <a routerLink="/contas" class="link-action">Gerenciar contas →</a>
+    </div>
+
+    @if (data.contas.length === 0) {
+      <div class="card empty-state">
+        <p>Você ainda não possui contas cadastradas.</p>
+        <a routerLink="/contas" class="btn btn-primary">Cadastrar primeira conta</a>
+      </div>
+    } @else {
+      <div class="accounts-grid">
+        @for (conta of data.contas; track conta.id) {
+          <div class="card account-card">
+            <div class="account-top">
+              <h3>{{ conta.descricao }}</h3>
+              <span class="account-balance" [class.negative]="conta.saldoAtual < 0">
+                {{ formatBRL(conta.saldoAtual) }}
+              </span>
+            </div>
+            <div class="account-metrics">
+              <span>Inicial: {{ formatBRL(conta.saldoInicial) }}</span>
+              <span class="positive">+ {{ formatBRL(conta.totalReceitas) }}</span>
+              <span class="negative">- {{ formatBRL(conta.totalDespesas) }}</span>
+            </div>
+            <a
+              routerLink="/transacoes"
+              [queryParams]="{ contaId: conta.id }"
+              class="link-action"
+            >
+              Ver transações desta conta →
+            </a>
+          </div>
+        }
+      </div>
+    }
+  </section>
+
+  <section class="section-block">
+    <div class="section-title-row">
+      <h2>Últimas Transações</h2>
+      <a routerLink="/transacoes" class="link-action">Ver todas e filtrar →</a>
+    </div>
+
+    <div class="card table-card">
+      @if (data.ultimasTransacoes.length === 0) {
+        <p class="empty-inline">Nenhuma transação registrada até o momento.</p>
+      } @else {
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Descrição</th>
+              <th>Conta</th>
+              <th>Categoria</th>
+              <th class="text-right">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (t of data.ultimasTransacoes; track t.id) {
+              <tr>
+                <td>{{ t.datatransacao | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  {{ t.descricao }}
+                  @if (t.transferenciaId) {
+                    <span class="badge badge-transfer">Transferência</span>
+                  }
+                </td>
+                <td>{{ t.contaDescricao }}</td>
+                <td><span class="badge">{{ t.categoriaDescricao }}</span></td>
+                <td class="text-right" [class.positive]="t.tipo === 'R'" [class.negative]="t.tipo === 'D'">
+                  {{ t.tipo === 'R' ? '+' : '-' }} {{ formatBRL(t.valor) }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </section>
+}

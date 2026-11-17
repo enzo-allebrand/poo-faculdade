@@ -1,0 +1,102 @@
+<div class="page-header">
+  <div>
+    <h1>Transferência entre Contas</h1>
+    <p class="subtitle">Movimente valores entre suas contas mantendo o saldo geral equilibrado</p>
+  </div>
+</div>
+
+@if (error()) {
+  <div class="alert alert-error">{{ error() }}</div>
+}
+@if (feedback()) {
+  <div class="alert alert-success">
+    {{ feedback() }}
+    <button type="button" class="link-inline" (click)="irParaTransacoes()">Ver transações →</button>
+  </div>
+}
+
+@if (loading()) {
+  <div class="card">Carregando contas...</div>
+} @else if (contas().length < 2) {
+  <div class="card empty-state">
+    <p>Você precisa ter pelo menos duas contas cadastradas para fazer uma transferência.</p>
+    <a routerLink="/contas" class="btn btn-primary">Ir para Contas</a>
+  </div>
+} @else {
+  <div class="two-col-layout">
+    <div class="card">
+      <h2>Nova Transferência</h2>
+      <form (ngSubmit)="transferir()" class="form-stack">
+        <label class="field">
+          <span>Conta de Origem (Saída)</span>
+          <select name="contaOrigemId" [(ngModel)]="contaOrigemId" required>
+            @for (c of contas(); track c.id) {
+              <option [ngValue]="c.id">
+                {{ c.descricao }} ({{ formatBRL(c.saldoAtual) }})
+              </option>
+            }
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Conta de Destino (Entrada)</span>
+          <select name="contaDestinoId" [(ngModel)]="contaDestinoId" required>
+            @for (c of contas(); track c.id) {
+              <option [ngValue]="c.id">
+                {{ c.descricao }} ({{ formatBRL(c.saldoAtual) }})
+              </option>
+            }
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Valor (R$)</span>
+          <input
+            type="number"
+            step="0.01"
+            min="0.01"
+            name="valor"
+            [(ngModel)]="valor"
+            required
+          />
+        </label>
+
+        <label class="field">
+          <span>Categoria (opcional)</span>
+          <select name="categoriaId" [(ngModel)]="categoriaId">
+            <option [ngValue]="null">Automática (Transferência)</option>
+            @for (cat of categorias(); track cat.id) {
+              <option [ngValue]="cat.id">{{ cat.descricao }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Descrição</span>
+          <input type="text" name="descricao" [(ngModel)]="descricao" />
+        </label>
+
+        <label class="field">
+          <span>Data e hora</span>
+          <input type="datetime-local" name="datatransacao" [(ngModel)]="datatransacao" />
+        </label>
+
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Transferindo...' : 'Confirmar Transferência' }}
+        </button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Saldos Atuais das Contas</h2>
+      <div class="account-list-compact">
+        @for (c of contas(); track c.id) {
+          <div class="account-row">
+            <span>{{ c.descricao }}</span>
+            <strong [class.negative]="c.saldoAtual < 0">{{ formatBRL(c.saldoAtual) }}</strong>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

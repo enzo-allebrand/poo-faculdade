@@ -1,0 +1,9 @@
+# Copie este arquivo para backend/config/application.properties (ignorado pelo Git)
+# Equivalente ao appsettings.Development.json para desenvolvimento local.
+
+quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/SEU_BANCO
+quarkus.datasource.username=SEU_USUARIO
+quarkus.datasource.password=SUA_SENHA
+
+# Kafka local (opcional se rodar em outra porta/host)
+kafka.bootstrap.servers=localhost:9092

@@ -1,0 +1,99 @@
+<div class="page-header">
+  <div>
+    <h1>Contas</h1>
+    <p class="subtitle">Cadastre suas contas bancárias, carteiras e acompanhe os saldos</p>
+  </div>
+</div>
+
+@if (error()) {
+  <div class="alert alert-error">{{ error() }}</div>
+}
+@if (feedback()) {
+  <div class="alert alert-success">{{ feedback() }}</div>
+}
+
+<div class="two-col-layout">
+  <div class="card">
+    <h2>{{ editandoId() ? 'Editar Conta' : 'Nova Conta' }}</h2>
+    <form (ngSubmit)="salvar()" class="form-stack">
+      <label class="field">
+        <span>Descrição</span>
+        <input
+          type="text"
+          name="descricao"
+          [(ngModel)]="descricao"
+          required
+          placeholder="Ex.: Nubank, Conta Corrente, Carteira"
+        />
+      </label>
+
+      <label class="field">
+        <span>Saldo inicial (R$)</span>
+        <input
+          type="number"
+          step="0.01"
+          name="saldoInicial"
+          [(ngModel)]="saldoInicial"
+        />
+      </label>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Salvando...' : editandoId() ? 'Atualizar' : 'Cadastrar' }}
+        </button>
+        @if (editandoId()) {
+          <button type="button" class="btn btn-secondary" (click)="limparFormulario()">
+            Cancelar
+          </button>
+        }
+      </div>
+    </form>
+  </div>
+
+  <div class="card table-card">
+    <h2>Contas Cadastradas</h2>
+    @if (loading()) {
+      <p>Carregando...</p>
+    } @else if (contas().length === 0) {
+      <p class="empty-inline">Nenhuma conta cadastrada ainda.</p>
+    } @else {
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Conta</th>
+            <th class="text-right">Inicial</th>
+            <th class="text-right">Receitas</th>
+            <th class="text-right">Despesas</th>
+            <th class="text-right">Saldo Atual</th>
+            <th class="text-right">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of contas(); track c.id) {
+            <tr>
+              <td>
+                <a routerLink="/transacoes" [queryParams]="{ contaId: c.id }" class="link-inline">
+                  {{ c.descricao }}
+                </a>
+              </td>
+              <td class="text-right">{{ formatBRL(c.saldoInicial) }}</td>
+              <td class="text-right positive">{{ formatBRL(c.totalReceitas) }}</td>
+              <td class="text-right negative">{{ formatBRL(c.totalDespesas) }}</td>
+              <td class="text-right">
+                <strong [class.negative]="c.saldoAtual < 0">{{ formatBRL(c.saldoAtual) }}</strong>
+              </td>
+              <td class="text-right actions-cell">
+                <button type="button" class="btn btn-small btn-secondary" (click)="editar(c)">
+                  Editar
+                </button>
+                <button type="button" class="btn btn-small btn-danger" (click)="excluir(c)">
+                  Excluir
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>

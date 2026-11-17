@@ -1,0 +1,78 @@
+<div class="auth-wrapper">
+  <div class="auth-card card">
+    <div class="auth-header">
+      <div class="brand-badge">FP</div>
+      <h1>Finanças POO</h1>
+      <p>Gestão financeira pessoal com Quarkus &amp; Angular</p>
+    </div>
+
+    <div class="auth-tabs">
+      <button
+        type="button"
+        [class.active]="mode() === 'login'"
+        (click)="toggleMode('login')"
+      >
+        Entrar
+      </button>
+      <button
+        type="button"
+        [class.active]="mode() === 'register'"
+        (click)="toggleMode('register')"
+      >
+        Criar conta
+      </button>
+    </div>
+
+    @if (error()) {
+      <div class="alert alert-error">{{ error() }}</div>
+    }
+
+    <form (ngSubmit)="submit()" class="form-stack">
+      @if (mode() === 'register') {
+        <label class="field">
+          <span>Nome</span>
+          <input
+            type="text"
+            name="nome"
+            [(ngModel)]="nome"
+            required
+            placeholder="Seu nome completo"
+          />
+        </label>
+      }
+
+      <label class="field">
+        <span>E-mail</span>
+        <input
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          required
+          placeholder="seu@email.com"
+        />
+      </label>
+
+      <label class="field">
+        <span>Senha</span>
+        <input
+          type="password"
+          name="senha"
+          [(ngModel)]="senha"
+          required
+          minlength="6"
+          placeholder="Mínimo 6 caracteres"
+        />
+      </label>
+
+      <button type="submit" class="btn btn-primary btn-full" [disabled]="loading()">
+        @if (loading()) {
+          Processando...
+        } @else if (mode() === 'login') {
+          Entrar
+        } @else {
+          Cadastrar e entrar
+        }
+      </button>
+    </form>
+  </div>
+</div>

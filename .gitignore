@@ -1,0 +1,57 @@
+# Maven / Quarkus (multi-módulo)
+backend/target/
+backend/*/target/
+backend/**/pom.xml.tag
+backend/**/pom.xml.releaseBackup
+backend/**/pom.xml.versionsBackup
+backend/**/release.properties
+backend/**/.flattened-pom.xml
+backend/.quarkus/
+backend/.certs/
+
+# Configurações locais com credenciais (equivalente ao appsettings.Development.json)
+backend/config/application.properties
+backend/config/*.local.properties
+.env
+*.env.local
+backend/.env
+backend/**/.env
+
+# Angular / Node
+frontend/dist/
+frontend/tmp/
+frontend/out-tsc/
+frontend/bazel-out/
+frontend/node_modules/
+frontend/.angular/cache/
+frontend/.sass-cache/
+frontend/connect.lock
+frontend/coverage/
+frontend/libpeerconnection.log
+frontend/testem.log
+frontend/typings/
+frontend/__screenshots__/
+*.log
+
+# IDEs and editors
+.idea/
+backend/.idea/
+backend/*/.idea/
+frontend/.idea/
+*.ipr
+*.iml
+*.iws
+.project
+.classpath
+.settings/
+bin/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/
+
+# System files
+.DS_Store
+Thumbs.db

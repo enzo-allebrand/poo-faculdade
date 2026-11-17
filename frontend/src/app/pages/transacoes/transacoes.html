@@ -1,0 +1,227 @@
+<div class="page-header">
+  <div>
+    <h1>Transações</h1>
+    <p class="subtitle">Lance receitas e despesas e filtre por conta, categoria ou período</p>
+  </div>
+  <div class="header-actions">
+    <a routerLink="/transferencia" class="btn btn-secondary">⇄ Nova Transferência</a>
+  </div>
+</div>
+
+@if (error()) {
+  <div class="alert alert-error">{{ error() }}</div>
+}
+@if (feedback()) {
+  <div class="alert alert-success">{{ feedback() }}</div>
+}
+
+<div class="two-col-layout">
+  <div class="card">
+    <h2>{{ editandoId() ? 'Editar Transação' : 'Nova Transação' }}</h2>
+
+    @if (contas().length === 0) {
+      <div class="alert alert-info">
+        Cadastre ao menos uma <a routerLink="/contas">conta</a> antes de lançar transações.
+      </div>
+    } @else {
+      <form (ngSubmit)="salvar()" class="form-stack">
+        <label class="field">
+          <span>Tipo</span>
+          <select name="tipo" [(ngModel)]="tipo">
+            <option value="D">Despesa (Saída)</option>
+            <option value="R">Receita (Entrada)</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Descrição</span>
+          <input
+            type="text"
+            name="descricao"
+            [(ngModel)]="descricao"
+            required
+            placeholder="Ex.: Supermercado, Salário, Conta de luz"
+          />
+        </label>
+
+        <label class="field">
+          <span>Valor (R$)</span>
+          <input
+            type="number"
+            step="0.01"
+            min="0.01"
+            name="valor"
+            [(ngModel)]="valor"
+            required
+          />
+        </label>
+
+        <label class="field">
+          <span>Conta</span>
+          <select name="contaId" [(ngModel)]="contaId" required>
+            @for (c of contas(); track c.id) {
+              <option [ngValue]="c.id">{{ c.descricao }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Categoria</span>
+          <select name="categoriaId" [(ngModel)]="categoriaId" required>
+            @for (cat of categorias(); track cat.id) {
+              <option [ngValue]="cat.id">{{ cat.descricao }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Data e hora</span>
+          <input type="datetime-local" name="datatransacao" [(ngModel)]="datatransacao" />
+        </label>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="saving()">
+            {{ saving() ? 'Salvando...' : editandoId() ? 'Atualizar' : 'Lançar' }}
+          </button>
+          @if (editandoId()) {
+            <button type="button" class="btn btn-secondary" (click)="limparFormulario()">
+              Cancelar
+            </button>
+          }
+        </div>
+      </form>
+    }
+  </div>
+
+  <div class="stack-col">
+    <div class="card">
+      <h2>Filtros</h2>
+      <div class="filters-grid">
+        <label class="field">
+          <span>Conta</span>
+          <select [(ngModel)]="filtroContaId" (ngModelChange)="buscarTransacoes()">
+            <option [ngValue]="null">Todas as contas</option>
+            @for (c of contas(); track c.id) {
+              <option [ngValue]="c.id">{{ c.descricao }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Categoria</span>
+          <select [(ngModel)]="filtroCategoriaId" (ngModelChange)="buscarTransacoes()">
+            <option [ngValue]="null">Todas as categorias</option>
+            @for (cat of categorias(); track cat.id) {
+              <option [ngValue]="cat.id">{{ cat.descricao }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Tipo</span>
+          <select [(ngModel)]="filtroTipo" (ngModelChange)="buscarTransacoes()">
+            <option value="">Todos</option>
+            <option value="R">Receitas</option>
+            <option value="D">Despesas</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Buscar descrição</span>
+          <input
+            type="text"
+            [(ngModel)]="filtroBusca"
+            (keyup.enter)="buscarTransacoes()"
+            placeholder="Ex.: mercado"
+          />
+        </label>
+
+        <label class="field">
+          <span>Data início</span>
+          <input type="date" [(ngModel)]="filtroDataInicio" (ngModelChange)="buscarTransacoes()" />
+        </label>
+
+        <label class="field">
+          <span>Data fim</span>
+          <input type="date" [(ngModel)]="filtroDataFim" (ngModelChange)="buscarTransacoes()" />
+        </label>
+      </div>
+
+      <div class="filter-actions">
+        <button type="button" class="btn btn-primary btn-small" (click)="buscarTransacoes()">
+          Aplicar filtros
+        </button>
+        <button type="button" class="btn btn-secondary btn-small" (click)="limparFiltros()">
+          Limpar filtros
+        </button>
+      </div>
+    </div>
+
+    <div class="filtered-summary">
+      <div class="card mini-stat">
+        <span>Receitas filtradas</span>
+        <strong class="positive">{{ formatBRL(totalReceitasFiltradas()) }}</strong>
+      </div>
+      <div class="card mini-stat">
+        <span>Despesas filtradas</span>
+        <strong class="negative">{{ formatBRL(totalDespesasFiltradas()) }}</strong>
+      </div>
+      <div class="card mini-stat">
+        <span>Resultado</span>
+        <strong [class.positive]="saldoFiltrado() >= 0" [class.negative]="saldoFiltrado() < 0">
+          {{ formatBRL(saldoFiltrado()) }}
+        </strong>
+      </div>
+    </div>
+
+    <div class="card table-card">
+      <h2>Lançamentos ({{ transacoes().length }})</h2>
+      @if (loading()) {
+        <p>Carregando transações...</p>
+      } @else if (transacoes().length === 0) {
+        <p class="empty-inline">Nenhuma transação encontrada para os filtros selecionados.</p>
+      } @else {
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Descrição</th>
+              <th>Conta</th>
+              <th>Categoria</th>
+              <th class="text-right">Valor</th>
+              <th class="text-right">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (t of transacoes(); track t.id) {
+              <tr>
+                <td>{{ t.datatransacao | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  {{ t.descricao }}
+                  @if (t.transferenciaId) {
+                    <span class="badge badge-transfer">Transferência</span>
+                  }
+                </td>
+                <td>{{ t.contaDescricao }}</td>
+                <td><span class="badge">{{ t.categoriaDescricao }}</span></td>
+                <td class="text-right" [class.positive]="t.tipo === 'R'" [class.negative]="t.tipo === 'D'">
+                  {{ t.tipo === 'R' ? '+' : '-' }} {{ formatBRL(t.valor) }}
+                </td>
+                <td class="text-right actions-cell">
+                  @if (!t.transferenciaId) {
+                    <button type="button" class="btn btn-small btn-secondary" (click)="editar(t)">
+                      Editar
+                    </button>
+                  }
+                  <button type="button" class="btn btn-small btn-danger" (click)="excluir(t)">
+                    Excluir
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
+</div>
