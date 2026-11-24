@@ -1,7 +1,8 @@
 <div class="page-header">
   <div>
+    <span class="eyebrow">LIVRO-RAZÃO • KAFKA</span>
     <h1>Transações</h1>
-    <p class="subtitle">Lance receitas e despesas e filtre por conta, categoria ou período</p>
+    <p class="subtitle">Registre entradas e saídas assíncronas e audite movimentações por período</p>
   </div>
   <div class="header-actions">
     <a routerLink="/transferencia" class="btn btn-secondary">⇄ Nova Transferência</a>
@@ -16,20 +17,23 @@
 }
 
 <div class="two-col-layout">
-  <div class="card">
-    <h2>{{ editandoId() ? 'Editar Transação' : 'Nova Transação' }}</h2>
+  <div class="card form-card">
+    <div class="card-head">
+      <h2>{{ editandoId() ? 'Editar Transação' : 'Novo Lançamento' }}</h2>
+      <p class="card-sub">Os novos lançamentos são enfileirados via Kafka com validação em cache</p>
+    </div>
 
     @if (contas().length === 0) {
       <div class="alert alert-info">
-        Cadastre ao menos uma <a routerLink="/contas">conta</a> antes de lançar transações.
+        Cadastre ao menos uma <a routerLink="/contas">conta financeira</a> antes de registrar transações.
       </div>
     } @else {
       <form (ngSubmit)="salvar()" class="form-stack">
         <label class="field">
-          <span>Tipo</span>
+          <span>Natureza da operação</span>
           <select name="tipo" [(ngModel)]="tipo">
-            <option value="D">Despesa (Saída)</option>
-            <option value="R">Receita (Entrada)</option>
+            <option value="D">↘ Despesa (Saída)</option>
+            <option value="R">↗ Receita (Entrada)</option>
           </select>
         </label>
 
@@ -40,7 +44,7 @@
             name="descricao"
             [(ngModel)]="descricao"
             required
-            placeholder="Ex.: Supermercado, Salário, Conta de luz"
+            placeholder="Ex.: Supermercado, Salário mensal, Energia"
           />
         </label>
 
@@ -57,7 +61,7 @@
         </label>
 
         <label class="field">
-          <span>Conta</span>
+          <span>Conta vinculada</span>
           <select name="contaId" [(ngModel)]="contaId" required>
             @for (c of contas(); track c.id) {
               <option [ngValue]="c.id">{{ c.descricao }}</option>
@@ -81,7 +85,7 @@
 
         <div class="form-actions">
           <button type="submit" class="btn btn-primary" [disabled]="saving()">
-            {{ saving() ? 'Salvando...' : editandoId() ? 'Atualizar' : 'Lançar' }}
+            {{ saving() ? 'Processando...' : editandoId() ? 'Atualizar lançamento' : '+ Registrar lançamento' }}
           </button>
           @if (editandoId()) {
             <button type="button" class="btn btn-secondary" (click)="limparFormulario()">
@@ -95,7 +99,21 @@
 
   <div class="stack-col">
     <div class="card">
-      <h2>Filtros</h2>
+      <div class="card-head-row">
+        <div>
+          <h2>Filtros de Auditoria</h2>
+          <p class="card-sub">Refine os lançamentos por conta, categoria, natureza ou período</p>
+        </div>
+        <div class="filter-actions-inline">
+          <button type="button" class="btn btn-secondary btn-small" (click)="limparFiltros()">
+            Limpar
+          </button>
+          <button type="button" class="btn btn-primary btn-small" (click)="buscarTransacoes()">
+            Filtrar
+          </button>
+        </div>
+      </div>
+
       <div class="filters-grid">
         <label class="field">
           <span>Conta</span>
@@ -146,38 +164,39 @@
           <input type="date" [(ngModel)]="filtroDataFim" (ngModelChange)="buscarTransacoes()" />
         </label>
       </div>
-
-      <div class="filter-actions">
-        <button type="button" class="btn btn-primary btn-small" (click)="buscarTransacoes()">
-          Aplicar filtros
-        </button>
-        <button type="button" class="btn btn-secondary btn-small" (click)="limparFiltros()">
-          Limpar filtros
-        </button>
-      </div>
     </div>
 
     <div class="filtered-summary">
       <div class="card mini-stat">
-        <span>Receitas filtradas</span>
-        <strong class="positive">{{ formatBRL(totalReceitasFiltradas()) }}</strong>
+        <span>Entradas filtradas</span>
+        <strong class="val-mono positive">+{{ formatBRL(totalReceitasFiltradas()) }}</strong>
       </div>
       <div class="card mini-stat">
-        <span>Despesas filtradas</span>
-        <strong class="negative">{{ formatBRL(totalDespesasFiltradas()) }}</strong>
+        <span>Saídas filtradas</span>
+        <strong class="val-mono negative">-{{ formatBRL(totalDespesasFiltradas()) }}</strong>
       </div>
       <div class="card mini-stat">
-        <span>Resultado</span>
-        <strong [class.positive]="saldoFiltrado() >= 0" [class.negative]="saldoFiltrado() < 0">
+        <span>Saldo do filtro</span>
+        <strong
+          class="val-mono"
+          [class.positive]="saldoFiltrado() >= 0"
+          [class.negative]="saldoFiltrado() < 0"
+        >
           {{ formatBRL(saldoFiltrado()) }}
         </strong>
       </div>
     </div>
 
     <div class="card table-card">
-      <h2>Lançamentos ({{ transacoes().length }})</h2>
+      <div class="card-head-row">
+        <div>
+          <h2>Lançamentos</h2>
+          <p class="card-sub">{{ transacoes().length }} registro(s) encontrado(s)</p>
+        </div>
+      </div>
+
       @if (loading()) {
-        <p>Carregando transações...</p>
+        <p class="empty-inline">Carregando transações...</p>
       } @else if (transacoes().length === 0) {
         <p class="empty-inline">Nenhuma transação encontrada para os filtros selecionados.</p>
       } @else {
@@ -195,16 +214,29 @@
           <tbody>
             @for (t of transacoes(); track t.id) {
               <tr>
-                <td>{{ t.datatransacao | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td class="val-mono cell-muted">{{ t.datatransacao | date: 'dd/MM/yyyy HH:mm' }}</td>
                 <td>
-                  {{ t.descricao }}
-                  @if (t.transferenciaId) {
-                    <span class="badge badge-transfer">Transferência</span>
-                  }
+                  <div class="tx-desc-cell">
+                    <span
+                      class="tx-flow-icon"
+                      [class.flow-income]="t.tipo === 'R'"
+                      [class.flow-expense]="t.tipo === 'D'"
+                    >
+                      {{ t.tipo === 'R' ? '↗' : '↘' }}
+                    </span>
+                    <span class="tx-title">{{ t.descricao }}</span>
+                    @if (t.transferenciaId) {
+                      <span class="badge badge-transfer">⇄ Transferência</span>
+                    }
+                  </div>
                 </td>
-                <td>{{ t.contaDescricao }}</td>
+                <td><span class="account-chip">{{ t.contaDescricao }}</span></td>
                 <td><span class="badge">{{ t.categoriaDescricao }}</span></td>
-                <td class="text-right" [class.positive]="t.tipo === 'R'" [class.negative]="t.tipo === 'D'">
+                <td
+                  class="text-right val-mono"
+                  [class.positive]="t.tipo === 'R'"
+                  [class.negative]="t.tipo === 'D'"
+                >
                   {{ t.tipo === 'R' ? '+' : '-' }} {{ formatBRL(t.valor) }}
                 </td>
                 <td class="text-right actions-cell">

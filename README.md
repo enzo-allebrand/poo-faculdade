@@ -23,7 +23,21 @@ Seguindo a separação estrita em camadas:
    *(Alternativamente, defina as variáveis de ambiente `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` e `KAFKA_BOOTSTRAP_SERVERS`.)*
 
 ## Como executar
-- **Pelo IntelliJ IDEA**: selecione a configuração **Fullstack (Backend + Frontend)** na barra superior e clique em **Run** (`Shift+F10`).
-- **Pelo terminal**:
-  - Backend: em `backend/`, execute `./mvnw -pl web quarkus:dev` (testes: `./mvnw test`)
-  - Frontend: em `frontend/`, execute `npm install` e `npm start`
+1. **Subir o Apache Kafka via Docker Compose** (na raiz do projeto):
+   ```bash
+   docker compose up -d
+   ```
+   *(O banco PostgreSQL `dev_financeiro` já deve estar rodando na porta `5432`, ex.: container `db-postgre`).*
+2. **Pelo IntelliJ IDEA**: selecione a configuração **Fullstack (Backend + Frontend)** (ou **Backend (Quarkus Dev)** / **Frontend (Angular Serve)**) na barra superior e clique em **Run** (`Shift+F10`).
+3. **Pelo terminal**:
+   - **Backend** (porta `8080`):
+     ```bash
+     cd backend
+     ./mvnw -pl web quarkus:dev
+     ```
+   - **Frontend** (porta `4200`):
+     ```bash
+     cd frontend
+     npm install
+     npm start
+     ```

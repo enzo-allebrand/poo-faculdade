@@ -1,11 +1,18 @@
 <div class="page-header">
   <div>
+    <span class="eyebrow">PAINEL PATRIMONIAL</span>
     <h1>Visão Geral</h1>
-    <p class="subtitle">Saldo geral, saldo por conta e últimas movimentações</p>
+    <p class="subtitle">Posição consolidada das carteiras, fluxo de caixa e últimos lançamentos</p>
   </div>
   <div class="header-actions">
-    <a routerLink="/transacoes" class="btn btn-primary">+ Nova Transação</a>
-    <a routerLink="/transferencia" class="btn btn-secondary">⇄ Transferir</a>
+    <a routerLink="/transferencia" class="btn btn-secondary">
+      <span>⇄</span>
+      <span>Transferir</span>
+    </a>
+    <a routerLink="/transacoes" class="btn btn-primary">
+      <span>+</span>
+      <span>Novo Lançamento</span>
+    </a>
   </div>
 </div>
 
@@ -14,39 +21,94 @@
 }
 
 @if (loading()) {
-  <div class="card">Carregando resumo financeiro...</div>
+  <div class="card loading-card">
+    <span class="pulse-dot"></span>
+    <span>Sincronizando dados financeiros...</span>
+  </div>
 } @else if (resumo(); as data) {
   <section class="summary-grid">
     <div class="card summary-card summary-total">
-      <span class="summary-label">Saldo Geral</span>
-      <strong class="summary-value" [class.negative]="data.saldoGeral < 0">
+      <div class="summary-head">
+        <span class="summary-label">Patrimônio Consolidado</span>
+        <span class="kpi-icon kpi-icon-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="5" width="20" height="14" rx="2" />
+            <line x1="2" y1="10" x2="22" y2="10" />
+          </svg>
+        </span>
+      </div>
+      <strong class="summary-value val-mono" [class.negative]="data.saldoGeral < 0">
         {{ formatBRL(data.saldoGeral) }}
       </strong>
-      <small>Soma de {{ data.contas.length }} conta(s)</small>
+      <div class="summary-foot">
+        <span class="meta-pill">{{ data.contas.length }} conta(s) ativa(s)</span>
+      </div>
     </div>
 
     <div class="card summary-card">
-      <span class="summary-label">Total de Receitas</span>
-      <strong class="summary-value positive">{{ formatBRL(data.totalReceitas) }}</strong>
-      <small>Entradas acumuladas</small>
+      <div class="summary-head">
+        <span class="summary-label">Total de Receitas</span>
+        <span class="kpi-icon kpi-icon-income">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+            <polyline points="17 6 23 6 23 12" />
+          </svg>
+        </span>
+      </div>
+      <strong class="summary-value val-mono positive">{{ formatBRL(data.totalReceitas) }}</strong>
+      <div class="summary-foot">
+        <small>Entradas acumuladas no livro-razão</small>
+      </div>
     </div>
 
     <div class="card summary-card">
-      <span class="summary-label">Total de Despesas</span>
-      <strong class="summary-value negative">{{ formatBRL(data.totalDespesas) }}</strong>
-      <small>Saídas acumuladas</small>
+      <div class="summary-head">
+        <span class="summary-label">Total de Despesas</span>
+        <span class="kpi-icon kpi-icon-expense">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
+            <polyline points="17 18 23 18 23 12" />
+          </svg>
+        </span>
+      </div>
+      <strong class="summary-value val-mono negative">{{ formatBRL(data.totalDespesas) }}</strong>
+      <div class="summary-foot">
+        <small>Saídas acumuladas no livro-razão</small>
+      </div>
     </div>
   </section>
 
+  @if (data.totalReceitas > 0 || data.totalDespesas > 0) {
+    <div class="card cashflow-strip">
+      <div class="cashflow-strip-head">
+        <span>Proporção do Fluxo Acumulado (Entradas vs. Saídas)</span>
+        <span class="val-mono">
+          {{
+            ((data.totalReceitas / (data.totalReceitas + data.totalDespesas)) * 100).toFixed(0)
+          }}% entradas
+        </span>
+      </div>
+      <div class="cashflow-bar">
+        <div
+          class="cashflow-bar-income"
+          [style.width.%]="(data.totalReceitas / (data.totalReceitas + data.totalDespesas)) * 100"
+        ></div>
+      </div>
+    </div>
+  }
+
   <section class="section-block">
     <div class="section-title-row">
-      <h2>Saldo por Conta</h2>
+      <div>
+        <h2>Carteiras &amp; Contas</h2>
+        <p class="section-sub">Saldos individuais calculados a partir do saldo inicial e movimentações</p>
+      </div>
       <a routerLink="/contas" class="link-action">Gerenciar contas →</a>
     </div>
 
     @if (data.contas.length === 0) {
       <div class="card empty-state">
-        <p>Você ainda não possui contas cadastradas.</p>
+        <p>Você ainda não possui nenhuma conta bancária ou carteira cadastrada.</p>
         <a routerLink="/contas" class="btn btn-primary">Cadastrar primeira conta</a>
       </div>
     } @else {
@@ -54,22 +116,46 @@
         @for (conta of data.contas; track conta.id) {
           <div class="card account-card">
             <div class="account-top">
-              <h3>{{ conta.descricao }}</h3>
-              <span class="account-balance" [class.negative]="conta.saldoAtual < 0">
+              <div class="account-title-group">
+                <span class="account-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+                    <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+                    <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
+                  </svg>
+                </span>
+                <div>
+                  <h3>{{ conta.descricao }}</h3>
+                  <span class="account-id-tag">ID #{{ conta.id }}</span>
+                </div>
+              </div>
+              <span class="account-balance val-mono" [class.negative]="conta.saldoAtual < 0">
                 {{ formatBRL(conta.saldoAtual) }}
               </span>
             </div>
+
             <div class="account-metrics">
-              <span>Inicial: {{ formatBRL(conta.saldoInicial) }}</span>
-              <span class="positive">+ {{ formatBRL(conta.totalReceitas) }}</span>
-              <span class="negative">- {{ formatBRL(conta.totalDespesas) }}</span>
+              <div class="metric-col">
+                <small>Inicial</small>
+                <span class="val-mono">{{ formatBRL(conta.saldoInicial) }}</span>
+              </div>
+              <div class="metric-col">
+                <small>Receitas</small>
+                <span class="val-mono positive">+{{ formatBRL(conta.totalReceitas) }}</span>
+              </div>
+              <div class="metric-col">
+                <small>Despesas</small>
+                <span class="val-mono negative">-{{ formatBRL(conta.totalDespesas) }}</span>
+              </div>
             </div>
+
             <a
               routerLink="/transacoes"
               [queryParams]="{ contaId: conta.id }"
-              class="link-action"
+              class="account-link-footer"
             >
-              Ver transações desta conta →
+              <span>Extrato da conta</span>
+              <span>→</span>
             </a>
           </div>
         }
@@ -79,8 +165,11 @@
 
   <section class="section-block">
     <div class="section-title-row">
-      <h2>Últimas Transações</h2>
-      <a routerLink="/transacoes" class="link-action">Ver todas e filtrar →</a>
+      <div>
+        <h2>Últimos Lançamentos</h2>
+        <p class="section-sub">Movimentações mais recentes processadas no sistema</p>
+      </div>
+      <a routerLink="/transacoes" class="link-action">Ver livro completo →</a>
     </div>
 
     <div class="card table-card">
@@ -100,16 +189,31 @@
           <tbody>
             @for (t of data.ultimasTransacoes; track t.id) {
               <tr>
-                <td>{{ t.datatransacao | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td class="val-mono cell-muted">{{ t.datatransacao | date: 'dd/MM/yyyy HH:mm' }}</td>
                 <td>
-                  {{ t.descricao }}
-                  @if (t.transferenciaId) {
-                    <span class="badge badge-transfer">Transferência</span>
-                  }
+                  <div class="tx-desc-cell">
+                    <span
+                      class="tx-flow-icon"
+                      [class.flow-income]="t.tipo === 'R'"
+                      [class.flow-expense]="t.tipo === 'D'"
+                    >
+                      {{ t.tipo === 'R' ? '↗' : '↘' }}
+                    </span>
+                    <span class="tx-title">{{ t.descricao }}</span>
+                    @if (t.transferenciaId) {
+                      <span class="badge badge-transfer">⇄ Transferência</span>
+                    }
+                  </div>
                 </td>
-                <td>{{ t.contaDescricao }}</td>
+                <td>
+                  <span class="account-chip">{{ t.contaDescricao }}</span>
+                </td>
                 <td><span class="badge">{{ t.categoriaDescricao }}</span></td>
-                <td class="text-right" [class.positive]="t.tipo === 'R'" [class.negative]="t.tipo === 'D'">
+                <td
+                  class="text-right val-mono"
+                  [class.positive]="t.tipo === 'R'"
+                  [class.negative]="t.tipo === 'D'"
+                >
                   {{ t.tipo === 'R' ? '+' : '-' }} {{ formatBRL(t.valor) }}
                 </td>
               </tr>

@@ -1,78 +1,145 @@
 <div class="auth-wrapper">
-  <div class="auth-card card">
-    <div class="auth-header">
-      <div class="brand-badge">FP</div>
-      <h1>Finanças POO</h1>
-      <p>Gestão financeira pessoal com Quarkus &amp; Angular</p>
-    </div>
+  <div class="auth-split">
+    <section class="auth-showcase">
+      <div class="showcase-top">
+        <div class="showcase-brand">
+          <span class="showcase-mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5z" />
+              <path d="M2 17l10 5 10-5" />
+              <path d="M2 12l10 5 10-5" />
+            </svg>
+          </span>
+          <span class="showcase-brand-name">Auru<span>Fin</span></span>
+          <span class="showcase-pill">CLEAN ARCH • KAFKA</span>
+        </div>
 
-    <div class="auth-tabs">
-      <button
-        type="button"
-        [class.active]="mode() === 'login'"
-        (click)="toggleMode('login')"
-      >
-        Entrar
-      </button>
-      <button
-        type="button"
-        [class.active]="mode() === 'register'"
-        (click)="toggleMode('register')"
-      >
-        Criar conta
-      </button>
-    </div>
+        <h1 class="showcase-headline">
+          Gestão financeira pessoal com <span>precisão de livro-razão</span>.
+        </h1>
+        <p class="showcase-desc">
+          Acompanhe seu patrimônio líquido, consolide múltiplas contas e processe lançamentos e transferências assíncronas em tempo real.
+        </p>
+      </div>
 
-    @if (error()) {
-      <div class="alert alert-error">{{ error() }}</div>
-    }
+      <div class="showcase-preview">
+        <div class="preview-card-main">
+          <div class="preview-row-between">
+            <span class="preview-kicker">PATRIMÔNIO CONSOLIDADO</span>
+            <span class="preview-trend">+18,4% no mês</span>
+          </div>
+          <div class="preview-balance">R$ 24.850,00</div>
+          <div class="preview-bar">
+            <span class="preview-bar-fill" style="width: 72%"></span>
+          </div>
+          <div class="preview-metrics">
+            <div>
+              <small>Entradas</small>
+              <strong class="positive">+ R$ 12.400,00</strong>
+            </div>
+            <div>
+              <small>Saídas</small>
+              <strong class="negative">- R$ 4.180,00</strong>
+            </div>
+          </div>
+        </div>
 
-    <form (ngSubmit)="submit()" class="form-stack">
-      @if (mode() === 'register') {
-        <label class="field">
-          <span>Nome</span>
-          <input
-            type="text"
-            name="nome"
-            [(ngModel)]="nome"
-            required
-            placeholder="Seu nome completo"
-          />
-        </label>
+        <div class="showcase-chips">
+          <div class="arch-chip">
+            <span class="chip-dot chip-dot-emerald"></span>
+            <span>Ingestão assíncrona via Apache Kafka</span>
+          </div>
+          <div class="arch-chip">
+            <span class="chip-dot chip-dot-cyan"></span>
+            <span>Sessão segura JWT em Cookie HttpOnly</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="auth-card card">
+      <div class="auth-header">
+        <span class="eyebrow">ACESSO SEGURO</span>
+        <h2>{{ mode() === 'login' ? 'Bem-vindo de volta' : 'Crie sua conta' }}</h2>
+        <p>
+          {{
+            mode() === 'login'
+              ? 'Entre com suas credenciais para acessar seu painel financeiro'
+              : 'Configure seu espaço financeiro pessoal em poucos segundos'
+          }}
+        </p>
+      </div>
+
+      <div class="auth-tabs" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          [class.active]="mode() === 'login'"
+          (click)="toggleMode('login')"
+        >
+          Entrar
+        </button>
+        <button
+          type="button"
+          role="tab"
+          [class.active]="mode() === 'register'"
+          (click)="toggleMode('register')"
+        >
+          Criar conta
+        </button>
+      </div>
+
+      @if (error()) {
+        <div class="alert alert-error">{{ error() }}</div>
       }
 
-      <label class="field">
-        <span>E-mail</span>
-        <input
-          type="email"
-          name="email"
-          [(ngModel)]="email"
-          required
-          placeholder="seu@email.com"
-        />
-      </label>
-
-      <label class="field">
-        <span>Senha</span>
-        <input
-          type="password"
-          name="senha"
-          [(ngModel)]="senha"
-          required
-          minlength="6"
-          placeholder="Mínimo 6 caracteres"
-        />
-      </label>
-
-      <button type="submit" class="btn btn-primary btn-full" [disabled]="loading()">
-        @if (loading()) {
-          Processando...
-        } @else if (mode() === 'login') {
-          Entrar
-        } @else {
-          Cadastrar e entrar
+      <form (ngSubmit)="submit()" class="form-stack">
+        @if (mode() === 'register') {
+          <label class="field">
+            <span>Nome completo</span>
+            <input
+              type="text"
+              name="nome"
+              [(ngModel)]="nome"
+              required
+              placeholder="Ex.: Enzo Allebrand"
+            />
+          </label>
         }
-      </button>
-    </form>
+
+        <label class="field">
+          <span>E-mail</span>
+          <input
+            type="email"
+            name="email"
+            [(ngModel)]="email"
+            required
+            placeholder="voce@exemplo.com"
+          />
+        </label>
+
+        <label class="field">
+          <span>Senha</span>
+          <input
+            type="password"
+            name="senha"
+            [(ngModel)]="senha"
+            required
+            minlength="6"
+            placeholder="Mínimo de 6 caracteres"
+          />
+        </label>
+
+        <button type="submit" class="btn btn-primary btn-full btn-lg" [disabled]="loading()">
+          @if (loading()) {
+            Processando...
+          } @else if (mode() === 'login') {
+            Acessar painel →
+          } @else {
+            Criar conta e entrar →
+          }
+        </button>
+      </form>
+    </section>
   </div>
 </div>

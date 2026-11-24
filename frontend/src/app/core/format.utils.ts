@@ -9,6 +9,9 @@ export function formatCurrencyBRL(value: number | null | undefined): string {
 
 export function extractErrorMessage(err: unknown, fallback = 'Ocorreu um erro inesperado.'): string {
   if (err instanceof HttpErrorResponse) {
+    if (err.status === 0) {
+      return 'Não foi possível conectar ao backend (http://localhost:8080). Verifique se o servidor Quarkus está rodando.';
+    }
     const body = err.error;
     if (body && typeof body === 'object') {
       if (typeof body.message === 'string' && body.message.trim()) {

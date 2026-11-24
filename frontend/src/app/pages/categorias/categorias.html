@@ -1,7 +1,8 @@
 <div class="page-header">
   <div>
+    <span class="eyebrow">CLASSIFICAÇÃO CONTÁBIL</span>
     <h1>Categorias</h1>
-    <p class="subtitle">Organize suas receitas e despesas por categoria</p>
+    <p class="subtitle">Estruture o plano de contas para classificar suas receitas e despesas</p>
   </div>
 </div>
 
@@ -13,8 +14,12 @@
 }
 
 <div class="two-col-layout">
-  <div class="card">
-    <h2>{{ editandoId() ? 'Editar Categoria' : 'Nova Categoria' }}</h2>
+  <div class="card form-card">
+    <div class="card-head">
+      <h2>{{ editandoId() ? 'Editar Categoria' : 'Nova Categoria' }}</h2>
+      <p class="card-sub">Restrinja a categoria a entradas, saídas ou permita uso misto</p>
+    </div>
+
     <form (ngSubmit)="salvar()" class="form-stack">
       <label class="field">
         <span>Descrição</span>
@@ -23,22 +28,22 @@
           name="descricao"
           [(ngModel)]="descricao"
           required
-          placeholder="Ex.: Alimentação, Salário, Aluguel"
+          placeholder="Ex.: Alimentação, Salário, Investimentos"
         />
       </label>
 
       <label class="field">
-        <span>Tipo</span>
+        <span>Natureza permitida</span>
         <select name="tipo" [(ngModel)]="tipo">
           <option value="A">Ambos (Receita e Despesa)</option>
-          <option value="R">Receita</option>
-          <option value="D">Despesa</option>
+          <option value="R">Somente Receita (Entrada)</option>
+          <option value="D">Somente Despesa (Saída)</option>
         </select>
       </label>
 
       <div class="form-actions">
         <button type="submit" class="btn btn-primary" [disabled]="saving()">
-          {{ saving() ? 'Salvando...' : editandoId() ? 'Atualizar' : 'Cadastrar' }}
+          {{ saving() ? 'Salvando...' : editandoId() ? 'Salvar alterações' : '+ Cadastrar categoria' }}
         </button>
         @if (editandoId()) {
           <button type="button" class="btn btn-secondary" (click)="limparFormulario()">
@@ -50,17 +55,23 @@
   </div>
 
   <div class="card table-card">
-    <h2>Categorias Cadastradas</h2>
+    <div class="card-head-row">
+      <div>
+        <h2>Categorias Cadastradas</h2>
+        <p class="card-sub">{{ categorias().length }} categoria(s) disponível(is)</p>
+      </div>
+    </div>
+
     @if (loading()) {
-      <p>Carregando...</p>
+      <p class="empty-inline">Carregando categorias...</p>
     } @else if (categorias().length === 0) {
       <p class="empty-inline">Nenhuma categoria cadastrada ainda.</p>
     } @else {
       <table class="data-table">
         <thead>
           <tr>
-            <th>Descrição</th>
-            <th>Tipo</th>
+            <th>Categoria</th>
+            <th>Natureza</th>
             <th class="text-right">Ações</th>
           </tr>
         </thead>

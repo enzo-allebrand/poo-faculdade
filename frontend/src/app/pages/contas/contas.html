@@ -1,7 +1,8 @@
 <div class="page-header">
   <div>
-    <h1>Contas</h1>
-    <p class="subtitle">Cadastre suas contas bancárias, carteiras e acompanhe os saldos</p>
+    <span class="eyebrow">CARTEIRAS &amp; BANCOS</span>
+    <h1>Contas Financeiras</h1>
+    <p class="subtitle">Gerencie suas contas bancárias, carteiras e acompanhe a evolução de cada saldo</p>
   </div>
 </div>
 
@@ -13,17 +14,21 @@
 }
 
 <div class="two-col-layout">
-  <div class="card">
-    <h2>{{ editandoId() ? 'Editar Conta' : 'Nova Conta' }}</h2>
+  <div class="card form-card">
+    <div class="card-head">
+      <h2>{{ editandoId() ? 'Editar Conta' : 'Nova Conta' }}</h2>
+      <p class="card-sub">Defina o nome de identificação e o saldo de abertura</p>
+    </div>
+
     <form (ngSubmit)="salvar()" class="form-stack">
       <label class="field">
-        <span>Descrição</span>
+        <span>Nome / Instituição</span>
         <input
           type="text"
           name="descricao"
           [(ngModel)]="descricao"
           required
-          placeholder="Ex.: Nubank, Conta Corrente, Carteira"
+          placeholder="Ex.: Nubank, Itaú, Carteira Física"
         />
       </label>
 
@@ -39,7 +44,7 @@
 
       <div class="form-actions">
         <button type="submit" class="btn btn-primary" [disabled]="saving()">
-          {{ saving() ? 'Salvando...' : editandoId() ? 'Atualizar' : 'Cadastrar' }}
+          {{ saving() ? 'Salvando...' : editandoId() ? 'Salvar alterações' : '+ Cadastrar conta' }}
         </button>
         @if (editandoId()) {
           <button type="button" class="btn btn-secondary" (click)="limparFormulario()">
@@ -51,9 +56,15 @@
   </div>
 
   <div class="card table-card">
-    <h2>Contas Cadastradas</h2>
+    <div class="card-head-row">
+      <div>
+        <h2>Contas Cadastradas</h2>
+        <p class="card-sub">{{ contas().length }} conta(s) registrada(s)</p>
+      </div>
+    </div>
+
     @if (loading()) {
-      <p>Carregando...</p>
+      <p class="empty-inline">Carregando contas...</p>
     } @else if (contas().length === 0) {
       <p class="empty-inline">Nenhuma conta cadastrada ainda.</p>
     } @else {
@@ -61,9 +72,9 @@
         <thead>
           <tr>
             <th>Conta</th>
-            <th class="text-right">Inicial</th>
-            <th class="text-right">Receitas</th>
-            <th class="text-right">Despesas</th>
+            <th class="text-right">Saldo Inicial</th>
+            <th class="text-right">Entradas</th>
+            <th class="text-right">Saídas</th>
             <th class="text-right">Saldo Atual</th>
             <th class="text-right">Ações</th>
           </tr>
@@ -76,10 +87,10 @@
                   {{ c.descricao }}
                 </a>
               </td>
-              <td class="text-right">{{ formatBRL(c.saldoInicial) }}</td>
-              <td class="text-right positive">{{ formatBRL(c.totalReceitas) }}</td>
-              <td class="text-right negative">{{ formatBRL(c.totalDespesas) }}</td>
-              <td class="text-right">
+              <td class="text-right val-mono cell-muted">{{ formatBRL(c.saldoInicial) }}</td>
+              <td class="text-right val-mono positive">+{{ formatBRL(c.totalReceitas) }}</td>
+              <td class="text-right val-mono negative">-{{ formatBRL(c.totalDespesas) }}</td>
+              <td class="text-right val-mono">
                 <strong [class.negative]="c.saldoAtual < 0">{{ formatBRL(c.saldoAtual) }}</strong>
               </td>
               <td class="text-right actions-cell">

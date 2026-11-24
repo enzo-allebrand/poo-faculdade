@@ -84,6 +84,9 @@
                 <artifactId>quarkus-maven-plugin</artifactId>
                 <version>${quarkus.platform.version}</version>
                 <extensions>true</extensions>
+                <configuration>
+                    <workingDir>${project.parent.basedir}</workingDir>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>

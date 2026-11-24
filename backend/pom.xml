@@ -54,6 +54,14 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${surefire-plugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>${quarkus.platform.group-id}</groupId>
+                    <artifactId>quarkus-maven-plugin</artifactId>
+                    <version>${quarkus.platform.version}</version>
+                    <configuration>
+                        <warnIfBuildGoalMissing>false</warnIfBuildGoalMissing>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>

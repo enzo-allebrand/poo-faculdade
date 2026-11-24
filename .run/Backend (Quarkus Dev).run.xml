@@ -5,16 +5,21 @@
       <option name="myRunnerSettings" />
       <option name="myRunnerParameters">
         <MavenRunnerParameters>
-          <option name="cmdOptions" value="-pl web" />
+          <option name="profiles">
+            <set />
+          </option>
           <option name="goals">
             <list>
               <option value="quarkus:dev" />
             </list>
           </option>
-          <option name="multimoduleDir" />
-          <option name="pomFileName" value="" />
+          <option name="multimoduleDir" value="$PROJECT_DIR$/backend" />
+          <option name="pomFileName" value="pom.xml" />
           <option name="profilesMap">
             <map />
+          </option>
+          <option name="projectsCmdOptionValues">
+            <list />
           </option>
           <option name="resolveToWorkspace" value="true" />
           <option name="workingDirPath" value="$PROJECT_DIR$/backend" />

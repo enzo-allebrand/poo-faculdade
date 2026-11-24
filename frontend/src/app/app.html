@@ -2,32 +2,127 @@
   <header class="topbar">
     <div class="topbar-inner">
       <a routerLink="/" class="brand">
-        <span class="brand-dot"></span>
-        <span>Finanças POO</span>
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+            <path d="M2 17l10 5 10-5" />
+            <path d="M2 12l10 5 10-5" />
+          </svg>
+        </span>
+        <span class="brand-text">
+          <span class="brand-title">Auru<span class="brand-accent">Fin</span></span>
+          <span class="brand-tag">LEDGER</span>
+        </span>
       </a>
 
-      <nav class="nav-links">
+      <nav class="nav-links" aria-label="Navegação principal">
         <a
           routerLink="/"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
         >
-          Início
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="9" rx="1.5" />
+            <rect x="14" y="3" width="7" height="5" rx="1.5" />
+            <rect x="14" y="12" width="7" height="9" rx="1.5" />
+            <rect x="3" y="16" width="7" height="5" rx="1.5" />
+          </svg>
+          <span>Visão Geral</span>
         </a>
-        <a routerLink="/transacoes" routerLinkActive="active">Transações</a>
-        <a routerLink="/transferencia" routerLinkActive="active">Transferência</a>
-        <a routerLink="/contas" routerLinkActive="active">Contas</a>
-        <a routerLink="/categorias" routerLinkActive="active">Categorias</a>
+        <a routerLink="/transacoes" routerLinkActive="active">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          </svg>
+          <span>Transações</span>
+        </a>
+        <a routerLink="/transferencia" routerLinkActive="active">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M7 10L12 5L17 10" />
+            <path d="M17 14L12 19L7 14" />
+          </svg>
+          <span>Transferência</span>
+        </a>
+        <a routerLink="/contas" routerLinkActive="active">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="5" width="20" height="14" rx="2" />
+            <line x1="2" y1="10" x2="22" y2="10" />
+          </svg>
+          <span>Contas</span>
+        </a>
+        <a routerLink="/categorias" routerLinkActive="active">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+            <line x1="7" y1="7" x2="7.01" y2="7" />
+          </svg>
+          <span>Categorias</span>
+        </a>
       </nav>
 
       <div class="user-area">
-        <span class="user-name">{{ user.nome }}</span>
-        <button type="button" class="btn btn-small btn-secondary" (click)="authService.logout()">
-          Sair
+        <button
+          type="button"
+          class="theme-toggle"
+          (click)="themeService.toggle()"
+          [attr.aria-label]="themeService.theme() === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'"
+          [title]="themeService.theme() === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'"
+        >
+          @if (themeService.theme() === 'dark') {
+            <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+            </svg>
+            <span class="theme-label">Claro</span>
+          } @else {
+            <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+            <span class="theme-label">Escuro</span>
+          }
+        </button>
+
+        <div class="user-pill">
+          <span class="user-avatar">{{ getInitials(user.nome) }}</span>
+          <span class="user-name">{{ user.nome }}</span>
+        </div>
+
+        <button
+          type="button"
+          class="btn-logout"
+          (click)="authService.logout()"
+          title="Encerrar sessão"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          <span>Sair</span>
         </button>
       </div>
     </div>
   </header>
+} @else {
+  <div class="floating-theme-bar">
+    <button
+      type="button"
+      class="theme-toggle"
+      (click)="themeService.toggle()"
+      [attr.aria-label]="themeService.theme() === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'"
+    >
+      @if (themeService.theme() === 'dark') {
+        <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+        </svg>
+        <span>Tema Claro</span>
+      } @else {
+        <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+        <span>Tema Escuro</span>
+      }
+    </button>
+  </div>
 }
 
 <main class="container">

@@ -1,7 +1,8 @@
 <div class="page-header">
   <div>
+    <span class="eyebrow">MOVIMENTAÇÃO INTERNA</span>
     <h1>Transferência entre Contas</h1>
-    <p class="subtitle">Movimente valores entre suas contas mantendo o saldo geral equilibrado</p>
+    <p class="subtitle">Transfira saldo entre carteiras com lançamento duplo atômico via Kafka</p>
   </div>
 </div>
 
@@ -10,25 +11,32 @@
 }
 @if (feedback()) {
   <div class="alert alert-success">
-    {{ feedback() }}
+    <span>{{ feedback() }}</span>
     <button type="button" class="link-inline" (click)="irParaTransacoes()">Ver transações →</button>
   </div>
 }
 
 @if (loading()) {
-  <div class="card">Carregando contas...</div>
+  <div class="card loading-card">
+    <span class="pulse-dot"></span>
+    <span>Carregando contas disponíveis...</span>
+  </div>
 } @else if (contas().length < 2) {
   <div class="card empty-state">
-    <p>Você precisa ter pelo menos duas contas cadastradas para fazer uma transferência.</p>
-    <a routerLink="/contas" class="btn btn-primary">Ir para Contas</a>
+    <p>Você precisa ter pelo menos duas contas cadastradas para realizar uma transferência.</p>
+    <a routerLink="/contas" class="btn btn-primary">Cadastrar contas</a>
   </div>
 } @else {
   <div class="two-col-layout">
-    <div class="card">
-      <h2>Nova Transferência</h2>
+    <div class="card form-card">
+      <div class="card-head">
+        <h2>Nova Transferência</h2>
+        <p class="card-sub">Gera automaticamente a saída na origem e a entrada no destino</p>
+      </div>
+
       <form (ngSubmit)="transferir()" class="form-stack">
         <label class="field">
-          <span>Conta de Origem (Saída)</span>
+          <span>Conta de Origem (Débito / Saída)</span>
           <select name="contaOrigemId" [(ngModel)]="contaOrigemId" required>
             @for (c of contas(); track c.id) {
               <option [ngValue]="c.id">
@@ -39,7 +47,7 @@
         </label>
 
         <label class="field">
-          <span>Conta de Destino (Entrada)</span>
+          <span>Conta de Destino (Crédito / Entrada)</span>
           <select name="contaDestinoId" [(ngModel)]="contaDestinoId" required>
             @for (c of contas(); track c.id) {
               <option [ngValue]="c.id">
@@ -50,7 +58,7 @@
         </label>
 
         <label class="field">
-          <span>Valor (R$)</span>
+          <span>Valor da transferência (R$)</span>
           <input
             type="number"
             step="0.01"
@@ -72,8 +80,8 @@
         </label>
 
         <label class="field">
-          <span>Descrição</span>
-          <input type="text" name="descricao" [(ngModel)]="descricao" />
+          <span>Descrição / Histórico</span>
+          <input type="text" name="descricao" [(ngModel)]="descricao" placeholder="Ex.: Reserva para investimentos" />
         </label>
 
         <label class="field">
@@ -81,19 +89,28 @@
           <input type="datetime-local" name="datatransacao" [(ngModel)]="datatransacao" />
         </label>
 
-        <button type="submit" class="btn btn-primary" [disabled]="saving()">
-          {{ saving() ? 'Transferindo...' : 'Confirmar Transferência' }}
+        <button type="submit" class="btn btn-primary btn-full" [disabled]="saving()">
+          {{ saving() ? 'Processando transferência...' : '⇄ Confirmar Transferência' }}
         </button>
       </form>
     </div>
 
     <div class="card">
-      <h2>Saldos Atuais das Contas</h2>
+      <div class="card-head">
+        <h2>Posição Atual das Contas</h2>
+        <p class="card-sub">Saldos disponíveis antes da transferência</p>
+      </div>
+
       <div class="account-list-compact">
         @for (c of contas(); track c.id) {
           <div class="account-row">
-            <span>{{ c.descricao }}</span>
-            <strong [class.negative]="c.saldoAtual < 0">{{ formatBRL(c.saldoAtual) }}</strong>
+            <div class="account-row-left">
+              <span class="account-dot"></span>
+              <span>{{ c.descricao }}</span>
+            </div>
+            <strong class="val-mono" [class.negative]="c.saldoAtual < 0">
+              {{ formatBRL(c.saldoAtual) }}
+            </strong>
           </div>
         }
       </div>
